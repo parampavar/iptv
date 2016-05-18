@@ -1,0 +1,11 @@
+---
+applications:
+  - name: iptv
+    memory: 256M
+    instances: 1
+    buildpack: https://github.com/cloudfoundry/go-buildpack.git
+    stack: cflinuxfs2
+    command: iptv
+    env:
+      GOPACKAGENAME: iptv
+    
