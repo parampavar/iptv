@@ -1,0 +1,129 @@
+#EXTM3U
+#EXTINF:-1 group-title=Tamil TV,About Script
+http://on.meshra.com/tiptv/about.wmv
+
+#EXTINF:-1 group-title=Tamil TV,Angel TV
+http://doh57iesfegop.cloudfront.net/angeltv/angeltvindia600/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Madha TV
+rtmp://103.49.238.70:1935/madhatv/_definst_playpath=mp4:myStream_source swfUrl=http://p.jwpcdn.com/player/v/7.2.2/jwplayer.flash.swf pageUrl=http://madha.tv/live-player.php
+ 
+#EXTINF:-1 group-title=Tamil TV,Anboli TV
+rtmp://38.96.148.172:1935/live/ playpath=anboli swfUrl=http://live.akamain.info/player/jw6/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/player/files/anboli/index.html
+ 
+#EXTINF:-1 group-title=Tamil TV,Sri Sankara TV
+rtmp://live.wmncdn.net/srisankaratv1/ playpath=986995610b14c8529ce441b18236d4c7.sdp swfUrl=http://player-apac-sing.webmobilive.com/player/liveplayer.swf pageUrl=http://www.srisankaratv.com/watchtv.php
+ 
+#EXTINF:-1 group-title=Tamil TV,News 7 Tamil
+http://d2voe16cs5psaw.cloudfront.net/news7new/smil:news7new.smil/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Athavan TV
+http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,EET TV
+http://37.59.17.222:1935/live_ca/eettv/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Arra TV
+http://arratvcloud.purplestream.in/arratvorg/smil:arratv.smil/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Imayam TV
+rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1
+ 
+#EXTINF:-1 group-title=Tamil TV,Lotus News
+http://118.102.228.195:1935/live/stream/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai
+http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Puthuyugam
+http://d211bpuke56xnv.cloudfront.net/ngmedia/pym_400/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Vasantham TV
+http://cdncities.com/vasanthamtv/vasanthamtv/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Dheeran TV
+http://edgecastdheerantv.purplestream.in/dheeranorg/ngrp:dheeran_all/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Thanthi TV
+http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Vimbam TV
+rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html
+ 
+#EXTINF:-1 group-title=Tamil TV,Vendhar TV
+rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/
+ 
+#EXTINF:-1 group-title=Tamil TV,IBC Tamil
+http://ibctamil.zecast.net/ibctamil/smil:ibctamil.smil/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Vasanth TV
+http://vasanth.live.cdn.bitgravity.com/vasanth/secure/live/feed01?e=0%26h=a9be0836bc39f96d0a9a958a659dfc1d%26bgsecuredir=1&amp;autoPlay=true
+
+#EXTINF:-1 group-title=Tamil TV,Makkal TV
+http://edgecastmakkaltv.purplestream.in/makkalorg/ngrp:makkaltv_all/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Masala TV
+rtmp://188.166.127.249/masalatv/ playpath=myStream swfUrl=http://www.mediaworldasia.dk/media/yendifvideoshare/player/player.swf?1462632676628 pageUrl=http://www.mediaworldasia.dk/index.php?option=com_yendifvideoshare&amp;view=video&amp;id=124&amp;tmpl=component
+ 
+#EXTINF:-1 group-title=Tamil TV,TTN Tamil Oli
+http://166.62.121.101:1935/ttn/ttn/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Vanavil Plus
+rtmp://server.maxwellstreaming.com/vanavil playpath=myStream swfUrl=http://www.maxwellstreaming.com/player.swf pageUrl=http://www.vanaviltv.in/live.php
+ 
+#EXTINF:-1 group-title=Tamil TV,DD Podhigai
+rtmp://live-fs.wmncdn.net/ddpodigailive1/ playpath=live1.stream swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.ddpodhigai.org.in/live.html
+ 
+#EXTINF:-1 group-title=Tamil TV,Kathir TV
+rtmp://server.maxwellstreaming.com:1935/kathir playpath=myStream swfUrl=http://www.livewebcast.in/jwplayer/player.swf pageUrl=http://kathirtv.com/livetv/
+ 
+#EXTINF:-1 group-title=Tamil TV,Saras TV
+http://live.streamjo.com:1935/sarastv/sarastv/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,1Yes TV
+http://stream.mslive.in:1967/live/gd416/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Tamil Biz TV
+rtmp://rtmp.santhoratv.zecast.net/tamilbusinesstv// playpath=tamilbusinesstv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/tamilbusinesstv.html
+ 
+#EXTINF:-1 group-title=Tamil TV,Santhora TV
+http://santhoratv.zecast.net/santhoratv/santhoratv/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Peppers TV
+rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html
+ 
+#EXTINF:-1 group-title=Tamil TV,Test 01
+http://mobile.amgiptv.com/vxtvlqkalaingertv/kalaingertvlq.stream/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Test 02
+http://play-fs.amgiptv.com/vxtvmegatv/megatv.stream/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil TV,Test 03
+http://50.7.1.178/india_iptv/sunmusicINDIA/playlist.m3u8
+
+#EXTINF:-1 group-title=Tamil Radio,Vanavil FM (R)
+http://s1.yesstreaming.net:9000/:stream/1
+
+#EXTINF:-1 group-title=Tamil Radio,Mukil FM (R)
+http://live64.jiljilradio.com/;stream1.mp3
+
+#EXTINF:-1 group-title=Tamil Radio,Kalasam FM (R)
+http://live.kalasam.com:8084
+
+#EXTINF:-1 group-title=Tamil Radio,LankaSri FM (R)
+http://media2.lankasri.fm
+
+#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)
+http://mediacorp.rastream.com/968fm?type=.flv
+
+#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)
+http://mediacorp.rastream.com/968fm?type=.flv
+
+#EXTINF:-1 group-title=Tamil Radio,THR Raaga (R)
+http://astro3.rastream.com:80/raaga?type=.flv
+
+#EXTINF:-1 group-title=Tamil Radio,ETR FM (R)
+http://cast2.serverhostingcenter.com:8646/stream
+
+#EXTINF:-1 group-title=Tamil Radio,Puradsi FM (R)
+http://puradsifm.net:9994

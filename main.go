@@ -1,11 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
+	"log" // "github.com/cihub/seelog"
 	"net/http"
 	"os"
-
-	"log" // "github.com/cihub/seelog"
+)
+import (
+	"bytes"
+	"fmt"
+	"io"
+	//	"errors"
+	//	"regexp"
+	"strconv"
+	"strings"
+	//	"time"
 )
 
 // const (
@@ -15,12 +24,14 @@ import (
 //     DB_NAME     = "postgres"
 //     DB_SSLMODE  = "disable"
 // )
+// http://phppgadmin-cfready-iptv.cfapps.io/redirect.php?server=pellefant-02.db.elephantsql.com%3A5432%3Aallow&subject=database&database=zvmfafqf
+// "postgres://zvmfafqf:3D9nQGb1LUrdJoSWMRcL1KtaFUAvbVkR@pellefant-02.db.elephantsql.com:5432/zvmfafqf"
 
 const (
-	DB_USER     = "u311d07be533d42da8c704a4c29f0d573"
-	DB_PASSWORD = "c9e75db43e744176a5970138c3b7f080"
-	DB_LOCATION = "10.72.6.110:5432"
-	DB_NAME     = "d311d07be533d42da8c704a4c29f0d573"
+	DB_USER     = "zvmfafqf"
+	DB_PASSWORD = "3D9nQGb1LUrdJoSWMRcL1KtaFUAvbVkR"
+	DB_LOCATION = "pellefant-02.db.elephantsql.com:5432"
+	DB_NAME     = "zvmfafqf"
 	DB_SSLMODE  = "disable" //verify-full"
 )
 
@@ -167,17 +178,29 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Starting")
 	//fmt.Fprintln(w, "Hello, GO World!n")
 	fmt.Fprintln(w, "#EXTM3U")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Sri Sankara TV")
-	fmt.Fprintln(w, "rtmp://live.wmncdn.net/srisankaratv1/ playpath=986995610b14c8529ce441b18236d4c7.sdp swfUrl=http://player-apac-sing.webmobilive.com/player/liveplayer.swf pageUrl=http://www.srisankaratv.com/watchtv.php")
-	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,News 7 Tamil")
 	fmt.Fprintln(w, "http://d2voe16cs5psaw.cloudfront.net/news7new/smil:news7new.smil/playlist.m3u8")
 	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Athavan TV")
-	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Thanthi TV")
+	fmt.Fprintln(w, "http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai")
+	fmt.Fprintln(w, "http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vendhar TV")
+	fmt.Fprintln(w, "rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,EET TV")
 	fmt.Fprintln(w, "http://37.59.17.222:1935/live_ca/eettv/playlist.m3u8")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vimbam TV")
+	fmt.Fprintln(w, "rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Peppers TV")
+	fmt.Fprintln(w, "rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Athavan TV")
+	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Arra TV")
 	fmt.Fprintln(w, "http://arratvcloud.purplestream.in/arratvorg/smil:arratv.smil/playlist.m3u8")
@@ -188,9 +211,6 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Lotus News")
 	fmt.Fprintln(w, "http://118.102.228.195:1935/live/stream/playlist.m3u8")
 	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai")
-	fmt.Fprintln(w, "http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8")
-	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthuyugam")
 	fmt.Fprintln(w, "http://d211bpuke56xnv.cloudfront.net/ngmedia/pym_400/playlist.m3u8")
 	fmt.Fprintln(w, "")
@@ -199,15 +219,6 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Dheeran TV")
 	fmt.Fprintln(w, "http://edgecastdheerantv.purplestream.in/dheeranorg/ngrp:dheeran_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Thanthi TV")
-	fmt.Fprintln(w, "http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vimbam TV")
-	fmt.Fprintln(w, "rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vendhar TV")
-	fmt.Fprintln(w, "rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,IBC Tamil")
 	fmt.Fprintln(w, "http://ibctamil.zecast.net/ibctamil/smil:ibctamil.smil/playlist.m3u8")
@@ -244,9 +255,6 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Santhora TV")
 	fmt.Fprintln(w, "http://santhoratv.zecast.net/santhoratv/santhoratv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Peppers TV")
-	fmt.Fprintln(w, "rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 01")
 	fmt.Fprintln(w, "http://mobile.amgiptv.com/vxtvlqkalaingertv/kalaingertvlq.stream/playlist.m3u8")
@@ -289,7 +297,19 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// defer log.Flush()
 	log.Println("App Started")
-	fmt.Println("App started")
+
+	f, err := os.Open("final.m3u")
+	if err != nil {
+		panic(err)
+	}
+	//	var mw = MediaPlaylist{SeqNo: 1, Title: "Abc", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+	//	fmt.Println(mw)
+	mw1, err := DecodeFrom(bufio.NewReader(f), true)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("XXXXXXXXXXX")
+	fmt.Println(mw1)
 
 	// router := mux.NewRouter()
 	// router.HandleFunc("/", HomeHandler)
@@ -297,19 +317,162 @@ func main() {
 	// // Bind to a port and pass our router in
 	// http.ListenAndServe(":8000", nil)
 
-	var port string
-	if port = os.Getenv("PORT"); len(port) == 0 {
-		log.Println("Warning, PORT not set. Defaulting to %+vn", DEFAULT_PORT)
-		port = DEFAULT_PORT
-	}
-	//	port = DEFAULT_PORT
+	//	var port string
+	//	if port = os.Getenv("PORT"); len(port) == 0 {
+	//		log.Println("Warning, PORT not set. Defaulting to %+vn", DEFAULT_PORT)
+	//		port = DEFAULT_PORT
+	//	}
+	//	//	port = DEFAULT_PORT
 
-	http.HandleFunc("/", HomeHandler)
-	http.HandleFunc("/v1", V1Handler)
+	//	http.HandleFunc("/", HomeHandler)
+	//	http.HandleFunc("/v1", V1Handler)
 
-	err := http.ListenAndServe(":"+port, nil)
+	//	err = http.ListenAndServe(":"+port, nil)
+	//	if err != nil {
+	//		log.Println("ListenAndServe: ", err)
+	//	}
+
+}
+
+type TVChannel struct {
+	SeqNo        uint64
+	Title        string
+	Urls         map[string]string
+	Groupdetails map[string]string
+}
+
+type MediaPlaylist struct {
+	Items []TVChannel
+}
+
+func (box *MediaPlaylist) AddItem(item TVChannel) []TVChannel {
+	box.Items = append(box.Items, item)
+	return box.Items
+}
+
+// Detect playlist type and decode it from input stream.
+func DecodeFrom(reader io.Reader, strict bool) ([]TVChannel, error) {
+	//mw := TVChannels
+	buf := new(bytes.Buffer)
+	_, err := buf.ReadFrom(reader)
 	if err != nil {
-		log.Println("ListenAndServe: ", err)
+		return nil, err
 	}
+	return decode(buf, strict)
+}
 
+// Detect playlist type and decode it. May be used as decoder for both master and media playlists.
+func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, error) {
+	var eof bool
+	var line string
+	var err error
+
+	//	chn1 := TVChannel{SeqNo: 1, Title: "Abc", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+	//	chn2 := TVChannel{SeqNo: 2, Title: "Def", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+	//	items := []TVChannel{}
+	//	box := MediaPlaylist{items}
+	//	box.AddItem(chn1)
+	//	box.AddItem(chn2)
+	//	fmt.Println(box.Items)
+	//	return box.Items, err
+
+	items := []TVChannel{}
+	box := MediaPlaylist{items}
+
+	for !eof {
+		if line, err = buf.ReadString('\n'); err == io.EOF {
+			eof = true
+		} else if err != nil {
+			break
+		}
+
+		// fixes the issues https://github.com/grafov/m3u8/issues/25
+		// TODO: the same should be done in decode functions of both Master- and MediaPlaylists
+		// so some DRYing would be needed.
+		if len(line) < 1 || line == "\r" {
+			continue
+		}
+
+		err = decodeLineOfMediaPlaylist(&box, line, strict)
+		if strict && err != nil {
+			return box.Items, err
+		}
+	}
+	return box.Items, nil
+}
+
+func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
+	var title string
+	var err error
+
+	line = strings.TrimSpace(line)
+	switch {
+	// start tag first
+	case line == "#EXTM3U":
+		m3u := true
+		//	case !state.tagInf && strings.HasPrefix(line, "#EXTINF:"):
+	case strings.HasPrefix(line, "#EXTINF:"):
+		params := strings.SplitN(line[8:], ",", 2)
+		if len(params) > 0 {
+			if duration, err := strconv.ParseFloat(params[0], 64); strict && err != nil {
+				return fmt.Errorf("Duration parsing error: %s", err)
+			}
+		}
+		if len(params) > 1 {
+			title = params[1]
+		}
+		//	case !strings.HasPrefix(line, "#"):
+		//		if state.tagInf {
+		//			p.Append(line, state.duration, title)
+		//			state.tagInf = false
+		//		}
+		//		if state.tagRange {
+		//			if err = p.SetRange(state.limit, state.offset); strict && err != nil {
+		//				return err
+		//			}
+		//			state.tagRange = false
+		//		}
+		//		if state.tagSCTE35 {
+		//			state.tagSCTE35 = false
+		//			scte := *state.scte
+		//			if err = p.SetSCTE(scte.Cue, scte.ID, scte.Time); strict && err != nil {
+		//				return err
+		//			}
+		//		}
+		//		if state.tagDiscontinuity {
+		//			state.tagDiscontinuity = false
+		//			if err = p.SetDiscontinuity(); strict && err != nil {
+		//				return err
+		//			}
+		//		}
+		//		if state.tagProgramDateTime {
+		//			state.tagProgramDateTime = false
+		//			if err = p.SetProgramDateTime(state.programDateTime); strict && err != nil {
+		//				return err
+		//			}
+		//		}
+		//		// If EXT-X-KEY appeared before reference to segment (EXTINF) then it linked to this segment
+		//		if state.tagKey {
+		//			p.Segments[p.last()].Key = &Key{state.xkey.Method, state.xkey.URI, state.xkey.IV, state.xkey.Keyformat, state.xkey.Keyformatversions}
+		//			// First EXT-X-KEY may appeared in the header of the playlist and linked to first segment
+		//			// but for convenient playlist generation it also linked as default playlist key
+		//			if p.Key == nil {
+		//				p.Key = state.xkey
+		//			}
+		//			state.tagKey = false
+		//		}
+		//		// If EXT-X-MAP appeared before reference to segment (EXTINF) then it linked to this segment
+		//		if state.tagMap {
+		//			p.Segments[p.last()].Map = &Map{state.xmap.URI, state.xmap.Limit, state.xmap.Offset}
+		//			// First EXT-X-MAP may appeared in the header of the playlist and linked to first segment
+		//			// but for convenient playlist generation it also linked as default playlist map
+		//			if p.Map == nil {
+		//				p.Map = state.xmap
+		//			}
+		//			state.tagMap = false
+		//		}
+	case strings.HasPrefix(line, "#"): // unknown tags treated as comments
+		return err
+	}
+	return err
 }
