@@ -12,9 +12,11 @@ import (
 	"io"
 	//	"errors"
 	//	"regexp"
-	"strconv"
+	//	"strconv"
 	"strings"
 	//	"time"
+	//	"encoding/json"
+	"regexp"
 )
 
 // const (
@@ -335,7 +337,7 @@ func main() {
 }
 
 type TVChannel struct {
-	SeqNo        uint64
+	SeqNo        int
 	Title        string
 	Urls         map[string]string
 	Groupdetails map[string]string
@@ -404,23 +406,43 @@ func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, error) {
 func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
 	var title string
 	var err error
+	var m3u bool
+	var duration float64
+	title = "a"
+	m3u = true
+	duration = 1
 
+	fmt.Printf("HHHH %d\n", len(p.Items))
+
+	re, _ := regexp.Compile(`(?P<groupKey>\w+-\w+\s*)=(?P<groupValue>\s*\"*\w+\s*\.*\w+\"*)`)
 	line = strings.TrimSpace(line)
 	switch {
 	// start tag first
 	case line == "#EXTM3U":
-		m3u := true
+		m3u = true
 		//	case !state.tagInf && strings.HasPrefix(line, "#EXTINF:"):
 	case strings.HasPrefix(line, "#EXTINF:"):
-		params := strings.SplitN(line[8:], ",", 2)
+
+		params := strings.Split(line[11:], ",")
 		if len(params) > 0 {
-			if duration, err := strconv.ParseFloat(params[0], 64); strict && err != nil {
-				return fmt.Errorf("Duration parsing error: %s", err)
-			}
+			//last is Title
+			title = params[len(params)-1]
 		}
-		if len(params) > 1 {
-			title = params[1]
+		fmt.Println("0:")
+		//fmt.Println(params[0])
+
+		r3 := re.FindAllStringSubmatch(params[0], -1)
+
+		md := map[string]string{}
+		for j, _ := range r3 {
+			md[r3[j][1]] = r3[j][2]
 		}
+		chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md, Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+		p.AddItem(chn1)
+		fmt.Println(md)
+
+		fmt.Println("1:")
+		fmt.Println(params[1])
 		//	case !strings.HasPrefix(line, "#"):
 		//		if state.tagInf {
 		//			p.Append(line, state.duration, title)
@@ -474,5 +496,8 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 	case strings.HasPrefix(line, "#"): // unknown tags treated as comments
 		return err
 	}
+	title = title + ""
+	m3u = !m3u
+	duration = duration + 0
 	return err
 }
