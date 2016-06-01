@@ -339,6 +339,7 @@ func main() {
 type TVChannel struct {
 	SeqNo        int
 	Title        string
+	MainUrl      string
 	Urls         map[string]string
 	Groupdetails map[string]string
 }
@@ -412,9 +413,8 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 	m3u = true
 	duration = 1
 
-	fmt.Printf("HHHH %d\n", len(p.Items))
-
-	re, _ := regexp.Compile(`(?P<groupKey>\w+-\w+\s*)=(?P<groupValue>\s*\"*\w+\s*\.*\w+\"*)`)
+	reGroups, _ := regexp.Compile(`(?P<groupKey>\w+-\w+\s*)=(?P<groupValue>\s*\"*\w+\s*\.*\w+\"*)`)           // matches group-title="Tamil TV" group-img="Tamil.jpg"
+	reUrls, _ := regexp.Compile(`(\w+)=((([\w-]+://?)?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))`) // matches rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1
 	line = strings.TrimSpace(line)
 	switch {
 	// start tag first
@@ -422,28 +422,44 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 		m3u = true
 		//	case !state.tagInf && strings.HasPrefix(line, "#EXTINF:"):
 	case strings.HasPrefix(line, "#EXTINF:"):
-
 		params := strings.Split(line[11:], ",")
 		if len(params) > 0 {
 			//last is Title
 			title = params[len(params)-1]
 		}
-		fmt.Println("0:")
-		//fmt.Println(params[0])
-
-		r3 := re.FindAllStringSubmatch(params[0], -1)
+		rMatchedGroups := reGroups.FindAllStringSubmatch(params[0], -1)
 
 		md := map[string]string{}
-		for j, _ := range r3 {
-			md[r3[j][1]] = r3[j][2]
+		for j, _ := range rMatchedGroups {
+			md[rMatchedGroups[j][1]] = rMatchedGroups[j][2]
 		}
-		chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md, Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+		//chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md, Urls: map[string]string{"u1": "u100", "u2": "u200"}}
+		chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md}
 		p.AddItem(chn1)
-		fmt.Println(md)
+		//fmt.Println(md)
 
-		fmt.Println("1:")
-		fmt.Println(params[1])
-		//	case !strings.HasPrefix(line, "#"):
+	case !strings.HasPrefix(line, "#"):
+		if len(line) > 0 {
+			// There could be multiple urls like
+			// rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1
+			urls := strings.SplitN(line, " ", 2)
+			fmt.Println(len(urls))
+
+			if len(urls) > 0 && len(urls[0]) > 0 {
+				chn1 := &p.Items[len(p.Items)-1] // Get the last item
+				chn1.MainUrl = urls[0]
+				if len(urls) > 1 {
+					fmt.Println("more than 1")
+					fmt.Println(urls[1])
+					rUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
+					mU := map[string]string{}
+					for j, _ := range rUrls {
+						mU[rUrls[j][1]] = rUrls[j][2]
+					}
+					chn1.Urls = mU
+				}
+			}
+		}
 		//		if state.tagInf {
 		//			p.Append(line, state.duration, title)
 		//			state.tagInf = false
