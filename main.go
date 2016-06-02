@@ -443,14 +443,11 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 			// There could be multiple urls like
 			// rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1
 			urls := strings.SplitN(line, " ", 2)
-			fmt.Println(len(urls))
 
 			if len(urls) > 0 && len(urls[0]) > 0 {
 				chn1 := &p.Items[len(p.Items)-1] // Get the last item
 				chn1.MainUrl = urls[0]
 				if len(urls) > 1 {
-					fmt.Println("more than 1")
-					fmt.Println(urls[1])
 					rUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
 					mU := map[string]string{}
 					for j, _ := range rUrls {
