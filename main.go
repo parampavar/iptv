@@ -5,14 +5,15 @@ import (
 	"log" // "github.com/cihub/seelog"
 	"net/http"
 	"os"
+	"strconv"
+
+	//	"github.com/jinzhu/gorm"
+	//	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 import (
 	"bytes"
 	"fmt"
 	"io"
-	//	"errors"
-	//	"regexp"
-	//	"strconv"
 	"strings"
 	//	"time"
 	//	"encoding/json"
@@ -29,17 +30,19 @@ import (
 // http://phppgadmin-cfready-iptv.cfapps.io/redirect.php?server=pellefant-02.db.elephantsql.com%3A5432%3Aallow&subject=database&database=zvmfafqf
 // "postgres://zvmfafqf:3D9nQGb1LUrdJoSWMRcL1KtaFUAvbVkR@pellefant-02.db.elephantsql.com:5432/zvmfafqf"
 
-const (
-	DB_USER     = "zvmfafqf"
-	DB_PASSWORD = "3D9nQGb1LUrdJoSWMRcL1KtaFUAvbVkR"
-	DB_LOCATION = "pellefant-02.db.elephantsql.com:5432"
-	DB_NAME     = "zvmfafqf"
-	DB_SSLMODE  = "disable" //verify-full"
-)
+//const (
+//	DB_USER     = "zvmfafqf"
+//	DB_PASSWORD = "3D9nQGb1LUrdJoSWMRcL1KtaFUAvbVkR"
+//	DB_LOCATION = "pellefant-02.db.elephantsql.com:5432"
+//	DB_NAME     = "zvmfafqf"
+//	DB_SSLMODE  = "disable" //verify-full"
+//)
 
 const (
 	DEFAULT_PORT = "9000"
 )
+
+var bFF_USEMAP = true
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Starting")
@@ -299,6 +302,23 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// defer log.Flush()
 	log.Println("App Started")
+	//	db, err := gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
+	//	if err != nil {
+	//		panic("failed to connect database")
+	//	}
+	//	// Migrate the schema
+	//	db.AutoMigrate(&TVChan{})
+	//	db.AutoMigrate(&TVUrl{})
+	//	db.AutoMigrate(&TVGroup{})
+
+	if sFF_USEMAP := os.Getenv("FF_USEMAP"); len(sFF_USEMAP) == 0 {
+		bFF_USEMAP, err := strconv.ParseBool(sFF_USEMAP)
+		if err != nil {
+			log.Println("Warning, FF_USEMAP not set. Defaulting to %+vn", bFF_USEMAP)
+			bFF_USEMAP = false
+		}
+	}
+	log.Println("FF_USEMAP set to %+vn", bFF_USEMAP)
 
 	f, err := os.Open("final.m3u")
 	if err != nil {
@@ -306,12 +326,14 @@ func main() {
 	}
 	//	var mw = MediaPlaylist{SeqNo: 1, Title: "Abc", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
 	//	fmt.Println(mw)
-	mw1, err := DecodeFrom(bufio.NewReader(f), true)
+	mw1, mw2, err := DecodeFrom(bufio.NewReader(f), true)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("XXXXXXXXXXX")
 	fmt.Println(mw1)
+	fmt.Println("YYYYYYYYYYY")
+	fmt.Println(mw2)
 
 	// router := mux.NewRouter()
 	// router.HandleFunc("/", HomeHandler)
@@ -336,6 +358,22 @@ func main() {
 
 }
 
+type TVChan struct {
+	SeqNo        int
+	Title        string
+	MainUrl      string
+	Urls         []TVUrl
+	Groupdetails []TVGroup
+}
+type TVUrl struct {
+	name  string
+	value string
+}
+type TVGroup struct {
+	name  string
+	value string
+}
+
 type TVChannel struct {
 	SeqNo        int
 	Title        string
@@ -345,7 +383,8 @@ type TVChannel struct {
 }
 
 type MediaPlaylist struct {
-	Items []TVChannel
+	Items    []TVChannel
+	ItemsNew []TVChan
 }
 
 func (box *MediaPlaylist) AddItem(item TVChannel) []TVChannel {
@@ -354,18 +393,18 @@ func (box *MediaPlaylist) AddItem(item TVChannel) []TVChannel {
 }
 
 // Detect playlist type and decode it from input stream.
-func DecodeFrom(reader io.Reader, strict bool) ([]TVChannel, error) {
+func DecodeFrom(reader io.Reader, strict bool) ([]TVChannel, []TVChan, error) {
 	//mw := TVChannels
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(reader)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return decode(buf, strict)
 }
 
 // Detect playlist type and decode it. May be used as decoder for both master and media playlists.
-func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, error) {
+func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, []TVChan, error) {
 	var eof bool
 	var line string
 	var err error
@@ -380,7 +419,8 @@ func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, error) {
 	//	return box.Items, err
 
 	items := []TVChannel{}
-	box := MediaPlaylist{items}
+	itemsNew := []TVChan{}
+	box := MediaPlaylist{items, itemsNew}
 
 	for !eof {
 		if line, err = buf.ReadString('\n'); err == io.EOF {
@@ -398,10 +438,10 @@ func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, error) {
 
 		err = decodeLineOfMediaPlaylist(&box, line, strict)
 		if strict && err != nil {
-			return box.Items, err
+			return box.Items, box.ItemsNew, err
 		}
 	}
-	return box.Items, nil
+	return box.Items, itemsNew, nil
 }
 
 func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
@@ -460,55 +500,7 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 				}
 			}
 		}
-		//		if state.tagInf {
-		//			p.Append(line, state.duration, title)
-		//			state.tagInf = false
-		//		}
-		//		if state.tagRange {
-		//			if err = p.SetRange(state.limit, state.offset); strict && err != nil {
-		//				return err
-		//			}
-		//			state.tagRange = false
-		//		}
-		//		if state.tagSCTE35 {
-		//			state.tagSCTE35 = false
-		//			scte := *state.scte
-		//			if err = p.SetSCTE(scte.Cue, scte.ID, scte.Time); strict && err != nil {
-		//				return err
-		//			}
-		//		}
-		//		if state.tagDiscontinuity {
-		//			state.tagDiscontinuity = false
-		//			if err = p.SetDiscontinuity(); strict && err != nil {
-		//				return err
-		//			}
-		//		}
-		//		if state.tagProgramDateTime {
-		//			state.tagProgramDateTime = false
-		//			if err = p.SetProgramDateTime(state.programDateTime); strict && err != nil {
-		//				return err
-		//			}
-		//		}
-		//		// If EXT-X-KEY appeared before reference to segment (EXTINF) then it linked to this segment
-		//		if state.tagKey {
-		//			p.Segments[p.last()].Key = &Key{state.xkey.Method, state.xkey.URI, state.xkey.IV, state.xkey.Keyformat, state.xkey.Keyformatversions}
-		//			// First EXT-X-KEY may appeared in the header of the playlist and linked to first segment
-		//			// but for convenient playlist generation it also linked as default playlist key
-		//			if p.Key == nil {
-		//				p.Key = state.xkey
-		//			}
-		//			state.tagKey = false
-		//		}
-		//		// If EXT-X-MAP appeared before reference to segment (EXTINF) then it linked to this segment
-		//		if state.tagMap {
-		//			p.Segments[p.last()].Map = &Map{state.xmap.URI, state.xmap.Limit, state.xmap.Offset}
-		//			// First EXT-X-MAP may appeared in the header of the playlist and linked to first segment
-		//			// but for convenient playlist generation it also linked as default playlist map
-		//			if p.Map == nil {
-		//				p.Map = state.xmap
-		//			}
-		//			state.tagMap = false
-		//		}
+
 	case strings.HasPrefix(line, "#"): // unknown tags treated as comments
 		return err
 	}
