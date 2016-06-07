@@ -366,12 +366,12 @@ type TVChan struct {
 	Groupdetails []TVGroup
 }
 type TVUrl struct {
-	name  string
-	value string
+	Name  string
+	Value string
 }
 type TVGroup struct {
-	name  string
-	value string
+	Name  string
+	Value string
 }
 
 type TVChannel struct {
@@ -441,7 +441,7 @@ func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, []TVChan, error) {
 			return box.Items, box.ItemsNew, err
 		}
 	}
-	return box.Items, itemsNew, nil
+	return box.Items, box.ItemsNew, nil
 }
 
 func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
@@ -467,16 +467,19 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 			//last is Title
 			title = params[len(params)-1]
 		}
+		chn2 := TVChan{SeqNo: len(p.Items) + 1, Title: title}
 		rMatchedGroups := reGroups.FindAllStringSubmatch(params[0], -1)
 
 		md := map[string]string{}
 		for j, _ := range rMatchedGroups {
 			md[rMatchedGroups[j][1]] = rMatchedGroups[j][2]
+			chn2.Groupdetails = append(chn2.Groupdetails, TVGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2]})
 		}
 		//chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md, Urls: map[string]string{"u1": "u100", "u2": "u200"}}
 		chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md}
 		p.AddItem(chn1)
-		//fmt.Println(md)
+		p.ItemsNew = append(p.ItemsNew, chn2)
+		fmt.Println(chn2)
 
 	case !strings.HasPrefix(line, "#"):
 		if len(line) > 0 {
@@ -487,11 +490,13 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 			if len(urls) > 0 && len(urls[0]) > 0 {
 				chn1 := &p.Items[len(p.Items)-1] // Get the last item
 				chn1.MainUrl = urls[0]
+				chn2 := &p.ItemsNew[len(p.ItemsNew)-1] // Get the last item
 				if len(urls) > 1 {
 					rUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
 					mU := map[string]string{}
 					for j, _ := range rUrls {
 						mU[rUrls[j][1]] = rUrls[j][2]
+						chn2.Urls = append(chn2.Urls, TVUrl{Name: rUrls[j][1], Value: rUrls[j][2]})
 					}
 					chn1.Urls = mU
 				}
