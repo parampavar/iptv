@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	//	"github.com/jinzhu/gorm"
-	//	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 import (
 	"bytes"
@@ -43,6 +43,8 @@ const (
 )
 
 var bFF_USEMAP = true
+var bFF_USEDB = true
+var pgdb *gorm.DB
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Starting")
@@ -302,38 +304,53 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// defer log.Flush()
 	log.Println("App Started")
-	//	db, err := gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
-	//	if err != nil {
-	//		panic("failed to connect database")
-	//	}
-	//	// Migrate the schema
-	//	db.AutoMigrate(&TVChan{})
-	//	db.AutoMigrate(&TVUrl{})
-	//	db.AutoMigrate(&TVGroup{})
 
 	if sFF_USEMAP := os.Getenv("FF_USEMAP"); len(sFF_USEMAP) == 0 {
 		bFF_USEMAP, err := strconv.ParseBool(sFF_USEMAP)
 		if err != nil {
 			log.Println("Warning, FF_USEMAP not set. Defaulting to %+vn", bFF_USEMAP)
-			bFF_USEMAP = false
 		}
 	}
 	log.Println("FF_USEMAP set to %+vn", bFF_USEMAP)
+
+	if sFF_USEDB := os.Getenv("FF_USEDB"); len(sFF_USEDB) == 0 {
+		bFF_USEDB, err := strconv.ParseBool(sFF_USEDB)
+		if err != nil {
+			log.Println("Warning, FF_USEDB not set. Defaulting to %+vn", bFF_USEDB)
+		}
+	}
+	log.Println("FF_USEDB set to %+vn", bFF_USEDB)
+
+	if bFF_USEDB == true {
+		pgdb, err := gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
+		if err != nil {
+			panic("failed to connect database")
+		}
+		// Migrate the schema
+		pgdb.DropTableIfExists(&Channel{})
+		pgdb.DropTableIfExists(&ChannelUrl{})
+		pgdb.DropTableIfExists(&ChannelGroup{})
+
+		pgdb.AutoMigrate(&Channel{})
+		pgdb.AutoMigrate(&ChannelUrl{})
+		pgdb.AutoMigrate(&ChannelGroup{})
+
+		pgdb.Model(&Channel{}).Related(&ChannelUrl{})
+		pgdb.Model(&Channel{}).Related(&ChannelGroup{})
+
+	}
 
 	f, err := os.Open("final.m3u")
 	if err != nil {
 		panic(err)
 	}
-	//	var mw = MediaPlaylist{SeqNo: 1, Title: "Abc", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
-	//	fmt.Println(mw)
-	mw1, mw2, err := DecodeFrom(bufio.NewReader(f), true)
+
+	mw1, err := DecodeFrom(bufio.NewReader(f), true)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("XXXXXXXXXXX")
 	fmt.Println(mw1)
-	fmt.Println("YYYYYYYYYYY")
-	fmt.Println(mw2)
 
 	// router := mux.NewRouter()
 	// router.HandleFunc("/", HomeHandler)
@@ -358,69 +375,48 @@ func main() {
 
 }
 
-type TVChan struct {
+type Channel struct {
+	gorm.Model
 	SeqNo        int
 	Title        string
 	MainUrl      string
-	Urls         []TVUrl
-	Groupdetails []TVGroup
+	Urls         []ChannelUrl
+	Groupdetails []ChannelGroup
 }
-type TVUrl struct {
-	Name  string
-	Value string
+type ChannelUrl struct {
+	gorm.Model
+	Name      string
+	Value     string
+	ChannelID uint
 }
-type TVGroup struct {
-	Name  string
-	Value string
-}
-
-type TVChannel struct {
-	SeqNo        int
-	Title        string
-	MainUrl      string
-	Urls         map[string]string
-	Groupdetails map[string]string
+type ChannelGroup struct {
+	gorm.Model
+	Name      string
+	Value     string
+	ChannelID uint
 }
 
 type MediaPlaylist struct {
-	Items    []TVChannel
-	ItemsNew []TVChan
-}
-
-func (box *MediaPlaylist) AddItem(item TVChannel) []TVChannel {
-	box.Items = append(box.Items, item)
-	return box.Items
+	ChannelList []Channel
 }
 
 // Detect playlist type and decode it from input stream.
-func DecodeFrom(reader io.Reader, strict bool) ([]TVChannel, []TVChan, error) {
-	//mw := TVChannels
+func DecodeFrom(reader io.Reader, strict bool) ([]Channel, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(reader)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return decode(buf, strict)
 }
 
-// Detect playlist type and decode it. May be used as decoder for both master and media playlists.
-func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, []TVChan, error) {
+// Decode media playlists.
+func decode(buf *bytes.Buffer, strict bool) ([]Channel, error) {
 	var eof bool
 	var line string
 	var err error
 
-	//	chn1 := TVChannel{SeqNo: 1, Title: "Abc", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
-	//	chn2 := TVChannel{SeqNo: 2, Title: "Def", Urls: map[string]string{"u1": "u100", "u2": "u200"}}
-	//	items := []TVChannel{}
-	//	box := MediaPlaylist{items}
-	//	box.AddItem(chn1)
-	//	box.AddItem(chn2)
-	//	fmt.Println(box.Items)
-	//	return box.Items, err
-
-	items := []TVChannel{}
-	itemsNew := []TVChan{}
-	box := MediaPlaylist{items, itemsNew}
+	box := MediaPlaylist{[]Channel{}}
 
 	for !eof {
 		if line, err = buf.ReadString('\n'); err == io.EOF {
@@ -438,48 +434,33 @@ func decode(buf *bytes.Buffer, strict bool) ([]TVChannel, []TVChan, error) {
 
 		err = decodeLineOfMediaPlaylist(&box, line, strict)
 		if strict && err != nil {
-			return box.Items, box.ItemsNew, err
+			return box.ChannelList, err
 		}
 	}
-	return box.Items, box.ItemsNew, nil
+	return box.ChannelList, nil
 }
 
 func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
 	var title string
 	var err error
-	var m3u bool
-	var duration float64
-	title = "a"
-	m3u = true
-	duration = 1
 
 	reGroups, _ := regexp.Compile(`(?P<groupKey>\w+-\w+\s*)=(?P<groupValue>\s*\"*\w+\s*\.*\w+\"*)`)           // matches group-title="Tamil TV" group-img="Tamil.jpg"
 	reUrls, _ := regexp.Compile(`(\w+)=((([\w-]+://?)?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))`) // matches rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1
 	line = strings.TrimSpace(line)
 	switch {
-	// start tag first
-	case line == "#EXTM3U":
-		m3u = true
-		//	case !state.tagInf && strings.HasPrefix(line, "#EXTINF:"):
 	case strings.HasPrefix(line, "#EXTINF:"):
 		params := strings.Split(line[11:], ",")
 		if len(params) > 0 {
 			//last is Title
 			title = params[len(params)-1]
 		}
-		chn2 := TVChan{SeqNo: len(p.Items) + 1, Title: title}
+		channel := Channel{SeqNo: len(p.ChannelList) + 1, Title: title}
 		rMatchedGroups := reGroups.FindAllStringSubmatch(params[0], -1)
-
-		md := map[string]string{}
 		for j, _ := range rMatchedGroups {
-			md[rMatchedGroups[j][1]] = rMatchedGroups[j][2]
-			chn2.Groupdetails = append(chn2.Groupdetails, TVGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2]})
+			channel.Groupdetails = append(channel.Groupdetails, ChannelGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2]})
 		}
-		//chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md, Urls: map[string]string{"u1": "u100", "u2": "u200"}}
-		chn1 := TVChannel{SeqNo: len(p.Items) + 1, Title: title, Groupdetails: md}
-		p.AddItem(chn1)
-		p.ItemsNew = append(p.ItemsNew, chn2)
-		fmt.Println(chn2)
+
+		p.ChannelList = append(p.ChannelList, channel)
 
 	case !strings.HasPrefix(line, "#"):
 		if len(line) > 0 {
@@ -488,18 +469,17 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 			urls := strings.SplitN(line, " ", 2)
 
 			if len(urls) > 0 && len(urls[0]) > 0 {
-				chn1 := &p.Items[len(p.Items)-1] // Get the last item
-				chn1.MainUrl = urls[0]
-				chn2 := &p.ItemsNew[len(p.ItemsNew)-1] // Get the last item
+				channel := &p.ChannelList[len(p.ChannelList)-1] // Get the last item
+				channel.MainUrl = urls[0]
+
 				if len(urls) > 1 {
-					rUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
-					mU := map[string]string{}
-					for j, _ := range rUrls {
-						mU[rUrls[j][1]] = rUrls[j][2]
-						chn2.Urls = append(chn2.Urls, TVUrl{Name: rUrls[j][1], Value: rUrls[j][2]})
+					rMatchedUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
+					for j, _ := range rMatchedUrls {
+						channel.Urls = append(channel.Urls, ChannelUrl{Name: rMatchedUrls[j][1], Value: rMatchedUrls[j][2]})
 					}
-					chn1.Urls = mU
+
 				}
+				pgdb.Create(channel)
 			}
 		}
 
@@ -507,7 +487,6 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 		return err
 	}
 	title = title + ""
-	m3u = !m3u
-	duration = duration + 0
+
 	return err
 }

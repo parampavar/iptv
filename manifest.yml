@@ -7,5 +7,6 @@ applications:
     stack: cflinuxfs2
     command: iptv
     env:
-      GOPACKAGENAME: iptv
-    
+        GOPACKAGENAME: iptv
+	    FF_USEMAP: false
+		FF_USEDB: false    
