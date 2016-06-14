@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+	//	"bufio"
 	"log" // "github.com/cihub/seelog"
 	"net/http"
 	"os"
@@ -44,7 +44,7 @@ const (
 
 var bFF_USEMAP = true
 var bFF_USEDB = true
-var pgdb *gorm.DB
+var PGdb *gorm.DB
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Starting")
@@ -181,8 +181,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Ending")
 }
 
-func V1Handler(w http.ResponseWriter, r *http.Request) {
-	log.Println("HomeHandler Starting")
+func V1ListHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("V1ListHandler Starting")
 	//fmt.Fprintln(w, "Hello, GO World!n")
 	fmt.Fprintln(w, "#EXTM3U")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,News 7 Tamil")
@@ -298,15 +298,43 @@ func V1Handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Puradsi FM (R)")
 	fmt.Fprintln(w, "http://puradsifm.net:9994")
-	log.Println("HomeHandler Ending")
+	log.Println("V1ListHandler Ending")
+}
+
+func V1ImportHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("V1ImportHandler Starting")
+	//	var f *os.File
+	//	var err error
+
+	//	f, err = os.Open("final.m3u")
+	//	if err != nil {
+	//		panic(err)
+	//	}
+
+	//	var mw1 []Channel
+	//	mw1, err = DecodeFrom(bufio.NewReader(f), true)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	fmt.Println("XXXXXXXXXXX")
+	//	fmt.Println(mw1)
+	//mq, _ := url.ParseQuery(r.URL.String())
+	mq := r.URL.Query()
+	for k, v := range mq {
+		fmt.Fprintln(w, "k="+k+",v="+v[0])
+		log.Println("k=" + k + ",v=" + v[0])
+	}
+
+	log.Println("V1ImportHandler Ending")
 }
 
 func main() {
 	// defer log.Flush()
 	log.Println("App Started")
+	var err error
 
 	if sFF_USEMAP := os.Getenv("FF_USEMAP"); len(sFF_USEMAP) == 0 {
-		bFF_USEMAP, err := strconv.ParseBool(sFF_USEMAP)
+		bFF_USEMAP, err = strconv.ParseBool(sFF_USEMAP)
 		if err != nil {
 			log.Println("Warning, FF_USEMAP not set. Defaulting to %+vn", bFF_USEMAP)
 		}
@@ -314,7 +342,7 @@ func main() {
 	log.Println("FF_USEMAP set to %+vn", bFF_USEMAP)
 
 	if sFF_USEDB := os.Getenv("FF_USEDB"); len(sFF_USEDB) == 0 {
-		bFF_USEDB, err := strconv.ParseBool(sFF_USEDB)
+		bFF_USEDB, err = strconv.ParseBool(sFF_USEDB)
 		if err != nil {
 			log.Println("Warning, FF_USEDB not set. Defaulting to %+vn", bFF_USEDB)
 		}
@@ -322,56 +350,61 @@ func main() {
 	log.Println("FF_USEDB set to %+vn", bFF_USEDB)
 
 	if bFF_USEDB == true {
-		pgdb, err := gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
+		PGdb, err = gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
 		if err != nil {
 			panic("failed to connect database")
 		}
+		PGdb.LogMode(true)
+
 		// Migrate the schema
-		pgdb.DropTableIfExists(&Channel{})
-		pgdb.DropTableIfExists(&ChannelUrl{})
-		pgdb.DropTableIfExists(&ChannelGroup{})
+		PGdb.DropTableIfExists(&Channel{})
+		fmt.Println("------------")
+		PGdb.DropTableIfExists(&ChannelUrl{})
+		PGdb.DropTableIfExists(&ChannelGroup{})
 
-		pgdb.AutoMigrate(&Channel{})
-		pgdb.AutoMigrate(&ChannelUrl{})
-		pgdb.AutoMigrate(&ChannelGroup{})
+		PGdb.AutoMigrate(&Channel{})
+		PGdb.AutoMigrate(&ChannelUrl{})
+		PGdb.AutoMigrate(&ChannelGroup{})
 
-		pgdb.Model(&Channel{}).Related(&ChannelUrl{})
-		pgdb.Model(&Channel{}).Related(&ChannelGroup{})
-
+		PGdb.Model(&Channel{}).Related(&ChannelUrl{})
+		PGdb.Model(&Channel{}).Related(&ChannelGroup{})
 	}
 
-	f, err := os.Open("final.m3u")
-	if err != nil {
-		panic(err)
-	}
-
-	mw1, err := DecodeFrom(bufio.NewReader(f), true)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("XXXXXXXXXXX")
-	fmt.Println(mw1)
-
-	// router := mux.NewRouter()
-	// router.HandleFunc("/", HomeHandler)
-	// router.HandleFunc("/db", DBHandler)
-	// // Bind to a port and pass our router in
-	// http.ListenAndServe(":8000", nil)
-
-	//	var port string
-	//	if port = os.Getenv("PORT"); len(port) == 0 {
-	//		log.Println("Warning, PORT not set. Defaulting to %+vn", DEFAULT_PORT)
-	//		port = DEFAULT_PORT
-	//	}
-	//	//	port = DEFAULT_PORT
-
-	//	http.HandleFunc("/", HomeHandler)
-	//	http.HandleFunc("/v1", V1Handler)
-
-	//	err = http.ListenAndServe(":"+port, nil)
+	//	var f *os.File
+	//	f, err = os.Open("final.m3u")
 	//	if err != nil {
-	//		log.Println("ListenAndServe: ", err)
+	//		panic(err)
 	//	}
+
+	//	var mw1 []Channel
+	//	mw1, err = DecodeFrom(bufio.NewReader(f), true)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	fmt.Println("XXXXXXXXXXX")
+	//	fmt.Println(mw1)
+
+	//	router := mux.NewRouter()
+	//	router.HandleFunc("/", HomeHandler)
+	//	router.HandleFunc("/db", DBHandler)
+	//	// Bind to a port and pass our router in
+	//	http.ListenAndServe(":8000", nil)
+
+	var port string
+	if port = os.Getenv("PORT"); len(port) == 0 {
+		log.Println("Warning, PORT not set. Defaulting to %+vn", DEFAULT_PORT)
+		port = DEFAULT_PORT
+	}
+	//	port = DEFAULT_PORT
+
+	http.HandleFunc("/", HomeHandler)
+	http.HandleFunc("/v1/list", V1ListHandler)
+	http.HandleFunc("/v1/import", V1ImportHandler)
+
+	err = http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Println("ListenAndServe: ", err)
+	}
 
 }
 
@@ -479,7 +512,7 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 					}
 
 				}
-				pgdb.Create(channel)
+				PGdb.Create(&channel)
 			}
 		}
 
