@@ -17,6 +17,7 @@ import (
 	"strings"
 	//	"time"
 	//	"encoding/json"
+	//	"io/ioutil"
 	"regexp"
 )
 
@@ -42,8 +43,8 @@ const (
 	DEFAULT_PORT = "9000"
 )
 
-var bFF_USEMAP = true
 var bFF_USEDB = true
+var bFF_ENABLEDBLOG = false
 var PGdb *gorm.DB
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -303,6 +304,7 @@ func V1ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func V1ImportHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("V1ImportHandler Starting")
+
 	//	var f *os.File
 	//	var err error
 
@@ -312,49 +314,68 @@ func V1ImportHandler(w http.ResponseWriter, r *http.Request) {
 	//	}
 
 	//	var mw1 []Channel
-	//	mw1, err = DecodeFrom(bufio.NewReader(f), true)
+	//	mw1, err = DecodeFrom(bufio.NewReader(f), "final.m3u")
 	//	if err != nil {
 	//		panic(err)
 	//	}
 	//	fmt.Println("XXXXXXXXXXX")
 	//	fmt.Println(mw1)
-	//mq, _ := url.ParseQuery(r.URL.String())
-	mq := r.URL.Query()
-	for k, v := range mq {
-		fmt.Fprintln(w, "k="+k+",v="+v[0])
-		log.Println("k=" + k + ",v=" + v[0])
-	}
 
+	//mq, _ := url.ParseQuery(r.URL.String())
+	//	mq := r.URL.Query()
+	//	for k, v := range mq {
+	//		fmt.Fprintln(w, "k="+k+",v="+v[0])
+	//		log.Println("k=" + k + ",v=" + v[0])
+	//	}
+	sUrl := r.URL.Query()["fromurl"]
+	if len(sUrl) > 0 {
+		log.Println("fromUrl=" + sUrl[0])
+
+		res, err := http.Get(sUrl[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = DecodeFrom(res.Body, sUrl[0])
+		res.Body.Close()
+		if err != nil {
+			panic(err)
+		}
+
+	} else {
+		log.Println("fromUrl is empty. nothing to do")
+	}
 	log.Println("V1ImportHandler Ending")
 }
 
+func getEnvVar(varname string, defaultVal bool) bool {
+	if sEnvVal := os.Getenv(varname); len(sEnvVal) == 0 {
+		bEnvVal, err := strconv.ParseBool(sEnvVal)
+		if err != nil {
+			return defaultVal
+		}
+		return bEnvVal
+	}
+	return defaultVal
+}
+
 func main() {
-	// defer log.Flush()
+
 	log.Println("App Started")
 	var err error
 
-	if sFF_USEMAP := os.Getenv("FF_USEMAP"); len(sFF_USEMAP) == 0 {
-		bFF_USEMAP, err = strconv.ParseBool(sFF_USEMAP)
-		if err != nil {
-			log.Println("Warning, FF_USEMAP not set. Defaulting to %+vn", bFF_USEMAP)
-		}
-	}
-	log.Println("FF_USEMAP set to %+vn", bFF_USEMAP)
-
-	if sFF_USEDB := os.Getenv("FF_USEDB"); len(sFF_USEDB) == 0 {
-		bFF_USEDB, err = strconv.ParseBool(sFF_USEDB)
-		if err != nil {
-			log.Println("Warning, FF_USEDB not set. Defaulting to %+vn", bFF_USEDB)
-		}
-	}
+	bFF_USEDB = getEnvVar("FF_USEDB", bFF_USEDB)
 	log.Println("FF_USEDB set to %+vn", bFF_USEDB)
+
+	bFF_ENABLEDBLOG = getEnvVar("FF_ENABLEDBLOG", bFF_ENABLEDBLOG)
+	log.Println("FF_ENABLEDBLOG set to %+vn", bFF_ENABLEDBLOG)
 
 	if bFF_USEDB == true {
 		PGdb, err = gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
 		if err != nil {
 			panic("failed to connect database")
 		}
-		PGdb.LogMode(true)
+		PGdb.LogMode(bFF_ENABLEDBLOG)
 
 		// Migrate the schema
 		PGdb.DropTableIfExists(&Channel{})
@@ -369,26 +390,6 @@ func main() {
 		PGdb.Model(&Channel{}).Related(&ChannelUrl{})
 		PGdb.Model(&Channel{}).Related(&ChannelGroup{})
 	}
-
-	//	var f *os.File
-	//	f, err = os.Open("final.m3u")
-	//	if err != nil {
-	//		panic(err)
-	//	}
-
-	//	var mw1 []Channel
-	//	mw1, err = DecodeFrom(bufio.NewReader(f), true)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	fmt.Println("XXXXXXXXXXX")
-	//	fmt.Println(mw1)
-
-	//	router := mux.NewRouter()
-	//	router.HandleFunc("/", HomeHandler)
-	//	router.HandleFunc("/db", DBHandler)
-	//	// Bind to a port and pass our router in
-	//	http.ListenAndServe(":8000", nil)
 
 	var port string
 	if port = os.Getenv("PORT"); len(port) == 0 {
@@ -411,8 +412,9 @@ func main() {
 type Channel struct {
 	gorm.Model
 	SeqNo        int
-	Title        string
+	Title        string `gorm:"unique_index:idx_title_source"` // Create index with title and source
 	MainUrl      string
+	Source       string `gorm:"unique_index:idx_title_source"` // Create index with title and source
 	Urls         []ChannelUrl
 	Groupdetails []ChannelGroup
 }
@@ -428,23 +430,22 @@ type ChannelGroup struct {
 	Value     string
 	ChannelID uint
 }
-
 type MediaPlaylist struct {
 	ChannelList []Channel
 }
 
 // Detect playlist type and decode it from input stream.
-func DecodeFrom(reader io.Reader, strict bool) ([]Channel, error) {
+func DecodeFrom(reader io.Reader, source string) ([]Channel, error) {
 	buf := new(bytes.Buffer)
 	_, err := buf.ReadFrom(reader)
 	if err != nil {
 		return nil, err
 	}
-	return decode(buf, strict)
+	return decode(buf, source)
 }
 
 // Decode media playlists.
-func decode(buf *bytes.Buffer, strict bool) ([]Channel, error) {
+func decode(buf *bytes.Buffer, source string) ([]Channel, error) {
 	var eof bool
 	var line string
 	var err error
@@ -465,15 +466,15 @@ func decode(buf *bytes.Buffer, strict bool) ([]Channel, error) {
 			continue
 		}
 
-		err = decodeLineOfMediaPlaylist(&box, line, strict)
-		if strict && err != nil {
+		err = decodeLineOfMediaPlaylist(&box, line, source)
+		if err != nil {
 			return box.ChannelList, err
 		}
 	}
 	return box.ChannelList, nil
 }
 
-func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error {
+func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, source string) error {
 	var title string
 	var err error
 
@@ -487,7 +488,7 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, strict bool) error
 			//last is Title
 			title = params[len(params)-1]
 		}
-		channel := Channel{SeqNo: len(p.ChannelList) + 1, Title: title}
+		channel := Channel{SeqNo: len(p.ChannelList) + 1, Title: title, Source: source}
 		rMatchedGroups := reGroups.FindAllStringSubmatch(params[0], -1)
 		for j, _ := range rMatchedGroups {
 			channel.Groupdetails = append(channel.Groupdetails, ChannelGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2]})
