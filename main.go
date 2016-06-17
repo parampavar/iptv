@@ -41,264 +41,173 @@ import (
 
 const (
 	DEFAULT_PORT = "9000"
+	EXTM3U       = "#EXTM3U"
+	EXTINF       = "#EXTINF:"
 )
 
 var bFF_USEDB = true
 var bFF_ENABLEDBLOG = false
+var bFF_DBRECREATE = false
 var PGdb *gorm.DB
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("HomeHandler Starting")
-	//fmt.Fprintln(w, "Hello, GO World!n")
-	fmt.Fprintln(w, "#EXTM3U")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,About Script")
-	fmt.Fprintln(w, "http://on.meshra.com/tiptv/about.wmv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Angel TV")
-	fmt.Fprintln(w, "http://doh57iesfegop.cloudfront.net/angeltv/angeltvindia600/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Madha TV")
-	fmt.Fprintln(w, "rtmp://103.49.238.70:1935/madhatv/_definst_playpath=mp4:myStream_source swfUrl=http://p.jwpcdn.com/player/v/7.2.2/jwplayer.flash.swf pageUrl=http://madha.tv/live-player.php")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Anboli TV")
-	fmt.Fprintln(w, "rtmp://38.96.148.172:1935/live/ playpath=anboli swfUrl=http://live.akamain.info/player/jw6/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/player/files/anboli/index.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Sri Sankara TV")
-	fmt.Fprintln(w, "rtmp://live.wmncdn.net/srisankaratv1/ playpath=986995610b14c8529ce441b18236d4c7.sdp swfUrl=http://player-apac-sing.webmobilive.com/player/liveplayer.swf pageUrl=http://www.srisankaratv.com/watchtv.php")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,News 7 Tamil")
-	fmt.Fprintln(w, "http://d2voe16cs5psaw.cloudfront.net/news7new/smil:news7new.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Athavan TV")
-	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,EET TV")
-	fmt.Fprintln(w, "http://37.59.17.222:1935/live_ca/eettv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Arra TV")
-	fmt.Fprintln(w, "http://arratvcloud.purplestream.in/arratvorg/smil:arratv.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Imayam TV")
-	fmt.Fprintln(w, "rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Lotus News")
-	fmt.Fprintln(w, "http://118.102.228.195:1935/live/stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai")
-	fmt.Fprintln(w, "http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthuyugam")
-	fmt.Fprintln(w, "http://d211bpuke56xnv.cloudfront.net/ngmedia/pym_400/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasantham TV")
-	fmt.Fprintln(w, "http://cdncities.com/vasanthamtv/vasanthamtv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Dheeran TV")
-	fmt.Fprintln(w, "http://edgecastdheerantv.purplestream.in/dheeranorg/ngrp:dheeran_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Thanthi TV")
-	fmt.Fprintln(w, "http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vimbam TV")
-	fmt.Fprintln(w, "rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vendhar TV")
-	fmt.Fprintln(w, "rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,IBC Tamil")
-	fmt.Fprintln(w, "http://ibctamil.zecast.net/ibctamil/smil:ibctamil.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasanth TV")
-	fmt.Fprintln(w, "http://vasanth.live.cdn.bitgravity.com/vasanth/secure/live/feed01?e=0%26h=a9be0836bc39f96d0a9a958a659dfc1d%26bgsecuredir=1&amp;autoPlay=true")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Makkal TV")
-	fmt.Fprintln(w, "http://edgecastmakkaltv.purplestream.in/makkalorg/ngrp:makkaltv_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Masala TV")
-	fmt.Fprintln(w, "rtmp://188.166.127.249/masalatv/ playpath=myStream swfUrl=http://www.mediaworldasia.dk/media/yendifvideoshare/player/player.swf?1462632676628 pageUrl=http://www.mediaworldasia.dk/index.php?option=com_yendifvideoshare&amp;view=video&amp;id=124&amp;tmpl=component")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,TTN Tamil Oli")
-	fmt.Fprintln(w, "http://166.62.121.101:1935/ttn/ttn/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vanavil Plus")
-	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com/vanavil playpath=myStream swfUrl=http://www.maxwellstreaming.com/player.swf pageUrl=http://www.vanaviltv.in/live.php")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,DD Podhigai")
-	fmt.Fprintln(w, "rtmp://live-fs.wmncdn.net/ddpodigailive1/ playpath=live1.stream swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.ddpodhigai.org.in/live.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Kathir TV")
-	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com:1935/kathir playpath=myStream swfUrl=http://www.livewebcast.in/jwplayer/player.swf pageUrl=http://kathirtv.com/livetv/")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Saras TV")
-	fmt.Fprintln(w, "http://live.streamjo.com:1935/sarastv/sarastv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,1Yes TV")
-	fmt.Fprintln(w, "http://stream.mslive.in:1967/live/gd416/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Tamil Biz TV")
-	fmt.Fprintln(w, "rtmp://rtmp.santhoratv.zecast.net/tamilbusinesstv// playpath=tamilbusinesstv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/tamilbusinesstv.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Santhora TV")
-	fmt.Fprintln(w, "http://santhoratv.zecast.net/santhoratv/santhoratv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Peppers TV")
-	fmt.Fprintln(w, "rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 01")
-	fmt.Fprintln(w, "http://mobile.amgiptv.com/vxtvlqkalaingertv/kalaingertvlq.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 02")
-	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvmegatv/megatv.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 03")
-	fmt.Fprintln(w, "http://50.7.1.178/india_iptv/sunmusicINDIA/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Vanavil FM (R)")
-	fmt.Fprintln(w, "http://s1.yesstreaming.net:9000/:stream/1")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Mukil FM (R)")
-	fmt.Fprintln(w, "http://live64.jiljilradio.com/;stream1.mp3")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Kalasam FM (R)")
-	fmt.Fprintln(w, "http://live.kalasam.com:8084")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,LankaSri FM (R)")
-	fmt.Fprintln(w, "http://media2.lankasri.fm")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
-	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
-	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,THR Raaga (R)")
-	fmt.Fprintln(w, "http://astro3.rastream.com:80/raaga?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,ETR FM (R)")
-	fmt.Fprintln(w, "http://cast2.serverhostingcenter.com:8646/stream")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Puradsi FM (R)")
-	fmt.Fprintln(w, "http://puradsifm.net:9994")
+	fmt.Fprintln(w, "Hello, GO World!n")
+	//	fmt.Fprintln(w, "#EXTM3U")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,About Script")
+	//	fmt.Fprintln(w, "http://on.meshra.com/tiptv/about.wmv")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Angel TV")
+	//	fmt.Fprintln(w, "http://doh57iesfegop.cloudfront.net/angeltv/angeltvindia600/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Madha TV")
+	//	fmt.Fprintln(w, "rtmp://103.49.238.70:1935/madhatv/_definst_playpath=mp4:myStream_source swfUrl=http://p.jwpcdn.com/player/v/7.2.2/jwplayer.flash.swf pageUrl=http://madha.tv/live-player.php")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Anboli TV")
+	//	fmt.Fprintln(w, "rtmp://38.96.148.172:1935/live/ playpath=anboli swfUrl=http://live.akamain.info/player/jw6/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/player/files/anboli/index.html")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Sri Sankara TV")
+	//	fmt.Fprintln(w, "rtmp://live.wmncdn.net/srisankaratv1/ playpath=986995610b14c8529ce441b18236d4c7.sdp swfUrl=http://player-apac-sing.webmobilive.com/player/liveplayer.swf pageUrl=http://www.srisankaratv.com/watchtv.php")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,News 7 Tamil")
+	//	fmt.Fprintln(w, "http://d2voe16cs5psaw.cloudfront.net/news7new/smil:news7new.smil/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Athavan TV")
+	//	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,EET TV")
+	//	fmt.Fprintln(w, "http://37.59.17.222:1935/live_ca/eettv/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Arra TV")
+	//	fmt.Fprintln(w, "http://arratvcloud.purplestream.in/arratvorg/smil:arratv.smil/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Imayam TV")
+	//	fmt.Fprintln(w, "rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Lotus News")
+	//	fmt.Fprintln(w, "http://118.102.228.195:1935/live/stream/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai")
+	//	fmt.Fprintln(w, "http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthuyugam")
+	//	fmt.Fprintln(w, "http://d211bpuke56xnv.cloudfront.net/ngmedia/pym_400/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasantham TV")
+	//	fmt.Fprintln(w, "http://cdncities.com/vasanthamtv/vasanthamtv/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Dheeran TV")
+	//	fmt.Fprintln(w, "http://edgecastdheerantv.purplestream.in/dheeranorg/ngrp:dheeran_all/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Thanthi TV")
+	//	fmt.Fprintln(w, "http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vimbam TV")
+	//	fmt.Fprintln(w, "rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vendhar TV")
+	//	fmt.Fprintln(w, "rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,IBC Tamil")
+	//	fmt.Fprintln(w, "http://ibctamil.zecast.net/ibctamil/smil:ibctamil.smil/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasanth TV")
+	//	fmt.Fprintln(w, "http://vasanth.live.cdn.bitgravity.com/vasanth/secure/live/feed01?e=0%26h=a9be0836bc39f96d0a9a958a659dfc1d%26bgsecuredir=1&amp;autoPlay=true")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Makkal TV")
+	//	fmt.Fprintln(w, "http://edgecastmakkaltv.purplestream.in/makkalorg/ngrp:makkaltv_all/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Masala TV")
+	//	fmt.Fprintln(w, "rtmp://188.166.127.249/masalatv/ playpath=myStream swfUrl=http://www.mediaworldasia.dk/media/yendifvideoshare/player/player.swf?1462632676628 pageUrl=http://www.mediaworldasia.dk/index.php?option=com_yendifvideoshare&amp;view=video&amp;id=124&amp;tmpl=component")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,TTN Tamil Oli")
+	//	fmt.Fprintln(w, "http://166.62.121.101:1935/ttn/ttn/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vanavil Plus")
+	//	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com/vanavil playpath=myStream swfUrl=http://www.maxwellstreaming.com/player.swf pageUrl=http://www.vanaviltv.in/live.php")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,DD Podhigai")
+	//	fmt.Fprintln(w, "rtmp://live-fs.wmncdn.net/ddpodigailive1/ playpath=live1.stream swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.ddpodhigai.org.in/live.html")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Kathir TV")
+	//	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com:1935/kathir playpath=myStream swfUrl=http://www.livewebcast.in/jwplayer/player.swf pageUrl=http://kathirtv.com/livetv/")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Saras TV")
+	//	fmt.Fprintln(w, "http://live.streamjo.com:1935/sarastv/sarastv/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,1Yes TV")
+	//	fmt.Fprintln(w, "http://stream.mslive.in:1967/live/gd416/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Tamil Biz TV")
+	//	fmt.Fprintln(w, "rtmp://rtmp.santhoratv.zecast.net/tamilbusinesstv// playpath=tamilbusinesstv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/tamilbusinesstv.html")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Santhora TV")
+	//	fmt.Fprintln(w, "http://santhoratv.zecast.net/santhoratv/santhoratv/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Peppers TV")
+	//	fmt.Fprintln(w, "rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 01")
+	//	fmt.Fprintln(w, "http://mobile.amgiptv.com/vxtvlqkalaingertv/kalaingertvlq.stream/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 02")
+	//	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvmegatv/megatv.stream/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 03")
+	//	fmt.Fprintln(w, "http://50.7.1.178/india_iptv/sunmusicINDIA/playlist.m3u8")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Vanavil FM (R)")
+	//	fmt.Fprintln(w, "http://s1.yesstreaming.net:9000/:stream/1")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Mukil FM (R)")
+	//	fmt.Fprintln(w, "http://live64.jiljilradio.com/;stream1.mp3")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Kalasam FM (R)")
+	//	fmt.Fprintln(w, "http://live.kalasam.com:8084")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,LankaSri FM (R)")
+	//	fmt.Fprintln(w, "http://media2.lankasri.fm")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
+	//	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
+	//	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,THR Raaga (R)")
+	//	fmt.Fprintln(w, "http://astro3.rastream.com:80/raaga?type=.flv")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,ETR FM (R)")
+	//	fmt.Fprintln(w, "http://cast2.serverhostingcenter.com:8646/stream")
+	//	fmt.Fprintln(w, "")
+	//	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Puradsi FM (R)")
+	//	fmt.Fprintln(w, "http://puradsifm.net:9994")
 	log.Println("HomeHandler Ending")
 }
 
 func V1ListHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("V1ListHandler Starting")
-	//fmt.Fprintln(w, "Hello, GO World!n")
-	fmt.Fprintln(w, "#EXTM3U")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,News 7 Tamil")
-	fmt.Fprintln(w, "http://d2voe16cs5psaw.cloudfront.net/news7new/smil:news7new.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Thanthi TV")
-	fmt.Fprintln(w, "http://edgecastthanthitv.purplestream.in/httporg/ngrp:thanthi_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthiya Thalaimurai")
-	fmt.Fprintln(w, "http://dzamqgwxt2cln.cloudfront.net/ngmedia/ptm_400/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vendhar TV")
-	fmt.Fprintln(w, "rtmp://45.79.203.234:1935/vendhar/ playpath=myStream swfUrl=http://vendharmedia.in/video-js.swf pageUrl=http://vendharmedia.in/")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,EET TV")
-	fmt.Fprintln(w, "http://37.59.17.222:1935/live_ca/eettv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vimbam TV")
-	fmt.Fprintln(w, "rtmp://91.219.43.148:1935/vimbamtv/ playpath=vimbamtv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.vimbamtv.com/movie.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Peppers TV")
-	fmt.Fprintln(w, "rtmp://live.wmncdn.net/pepperstv/ playpath=51f5cdae2cc7bd5e4e8e76b7357ae0f8.sdp swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/pepperstv.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Athavan TV")
-	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvathavan/athavantvlive.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Arra TV")
-	fmt.Fprintln(w, "http://arratvcloud.purplestream.in/arratvorg/smil:arratv.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Imayam TV")
-	fmt.Fprintln(w, "rtmp://38.96.148.172:1935/live/ playpath=imayamtv swfUrl=http://live.akamain.info/v1/imayamtv/jwplayer/jwplayer.flash.swf pageUrl=http://live.akamain.info/v1/imayamtv/index.html live=1")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Lotus News")
-	fmt.Fprintln(w, "http://118.102.228.195:1935/live/stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Puthuyugam")
-	fmt.Fprintln(w, "http://d211bpuke56xnv.cloudfront.net/ngmedia/pym_400/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasantham TV")
-	fmt.Fprintln(w, "http://cdncities.com/vasanthamtv/vasanthamtv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Dheeran TV")
-	fmt.Fprintln(w, "http://edgecastdheerantv.purplestream.in/dheeranorg/ngrp:dheeran_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,IBC Tamil")
-	fmt.Fprintln(w, "http://ibctamil.zecast.net/ibctamil/smil:ibctamil.smil/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vasanth TV")
-	fmt.Fprintln(w, "http://vasanth.live.cdn.bitgravity.com/vasanth/secure/live/feed01?e=0%26h=a9be0836bc39f96d0a9a958a659dfc1d%26bgsecuredir=1&amp;autoPlay=true")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Makkal TV")
-	fmt.Fprintln(w, "http://edgecastmakkaltv.purplestream.in/makkalorg/ngrp:makkaltv_all/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Masala TV")
-	fmt.Fprintln(w, "rtmp://188.166.127.249/masalatv/ playpath=myStream swfUrl=http://www.mediaworldasia.dk/media/yendifvideoshare/player/player.swf?1462632676628 pageUrl=http://www.mediaworldasia.dk/index.php?option=com_yendifvideoshare&amp;view=video&amp;id=124&amp;tmpl=component")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,TTN Tamil Oli")
-	fmt.Fprintln(w, "http://166.62.121.101:1935/ttn/ttn/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Vanavil Plus")
-	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com/vanavil playpath=myStream swfUrl=http://www.maxwellstreaming.com/player.swf pageUrl=http://www.vanaviltv.in/live.php")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,DD Podhigai")
-	fmt.Fprintln(w, "rtmp://live-fs.wmncdn.net/ddpodigailive1/ playpath=live1.stream swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://www.ddpodhigai.org.in/live.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Kathir TV")
-	fmt.Fprintln(w, "rtmp://server.maxwellstreaming.com:1935/kathir playpath=myStream swfUrl=http://www.livewebcast.in/jwplayer/player.swf pageUrl=http://kathirtv.com/livetv/")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Saras TV")
-	fmt.Fprintln(w, "http://live.streamjo.com:1935/sarastv/sarastv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,1Yes TV")
-	fmt.Fprintln(w, "http://stream.mslive.in:1967/live/gd416/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Tamil Biz TV")
-	fmt.Fprintln(w, "rtmp://rtmp.santhoratv.zecast.net/tamilbusinesstv// playpath=tamilbusinesstv swfUrl=http://p.jwpcdn.com/6/12/jwplayer.flash.swf pageUrl=http://livetvchannelsfree.com/tamilbusinesstv.html")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Santhora TV")
-	fmt.Fprintln(w, "http://santhoratv.zecast.net/santhoratv/santhoratv/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 01")
-	fmt.Fprintln(w, "http://mobile.amgiptv.com/vxtvlqkalaingertv/kalaingertvlq.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 02")
-	fmt.Fprintln(w, "http://play-fs.amgiptv.com/vxtvmegatv/megatv.stream/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil TV,Test 03")
-	fmt.Fprintln(w, "http://50.7.1.178/india_iptv/sunmusicINDIA/playlist.m3u8")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Vanavil FM (R)")
-	fmt.Fprintln(w, "http://s1.yesstreaming.net:9000/:stream/1")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Mukil FM (R)")
-	fmt.Fprintln(w, "http://live64.jiljilradio.com/;stream1.mp3")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Kalasam FM (R)")
-	fmt.Fprintln(w, "http://live.kalasam.com:8084")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,LankaSri FM (R)")
-	fmt.Fprintln(w, "http://media2.lankasri.fm")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
-	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Oli 96.8 FM (R)")
-	fmt.Fprintln(w, "http://mediacorp.rastream.com/968fm?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,THR Raaga (R)")
-	fmt.Fprintln(w, "http://astro3.rastream.com:80/raaga?type=.flv")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,ETR FM (R)")
-	fmt.Fprintln(w, "http://cast2.serverhostingcenter.com:8646/stream")
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "#EXTINF:-1 group-title=Tamil Radio,Puradsi FM (R)")
-	fmt.Fprintln(w, "http://puradsifm.net:9994")
+
+	sUrl := r.URL.Query()["type"]
+	sType := ""
+	if len(sUrl) > 0 {
+		sType = strings.ToLower(sUrl[0])
+		log.Println("type=" + sType)
+	}
+	if bFF_USEDB == true {
+		channels := []Channel{}
+		if len(sType) == 0 {
+			PGdb.Preload("Groupdetails").Preload("Urls").Find(&channels)
+		} else {
+			PGdb.Joins("JOIN channel_groups on channel_groups.channel_id = channels.id").Where("channel_groups.valuelcase like ?", "%"+sType+"%").Preload("Groupdetails").Preload("Urls").Find(&channels)
+		}
+
+		fmt.Fprintln(w, EXTM3U)
+		for _, v := range channels {
+			fmt.Fprintln(w, v.StringM3U())
+		}
+	}
+
 	log.Println("V1ListHandler Ending")
 }
 
@@ -370,6 +279,9 @@ func main() {
 	bFF_ENABLEDBLOG = getEnvVar("FF_ENABLEDBLOG", bFF_ENABLEDBLOG)
 	log.Println("FF_ENABLEDBLOG set to %+vn", bFF_ENABLEDBLOG)
 
+	bFF_DBRECREATE = getEnvVar("FF_DBRECREATE", bFF_DBRECREATE)
+	log.Println("FF_DBRECREATE set to %+vn", bFF_DBRECREATE)
+
 	if bFF_USEDB == true {
 		PGdb, err = gorm.Open("postgres", "user=postgres password=postgres DB.name=iptv sslmode=disable")
 		if err != nil {
@@ -377,12 +289,12 @@ func main() {
 		}
 		PGdb.LogMode(bFF_ENABLEDBLOG)
 
+		if bFF_DBRECREATE == true {
+			PGdb.DropTableIfExists(&Channel{})
+			PGdb.DropTableIfExists(&ChannelUrl{})
+			PGdb.DropTableIfExists(&ChannelGroup{})
+		}
 		// Migrate the schema
-		PGdb.DropTableIfExists(&Channel{})
-		fmt.Println("------------")
-		PGdb.DropTableIfExists(&ChannelUrl{})
-		PGdb.DropTableIfExists(&ChannelGroup{})
-
 		PGdb.AutoMigrate(&Channel{})
 		PGdb.AutoMigrate(&ChannelUrl{})
 		PGdb.AutoMigrate(&ChannelGroup{})
@@ -412,26 +324,54 @@ func main() {
 type Channel struct {
 	gorm.Model
 	SeqNo        int
-	Title        string `gorm:"unique_index:idx_title_source"` // Create index with title and source
+	Title        string
+	Titlelcase   string `gorm:"unique_index:idx_title_source"` // Create index with title and source
 	MainUrl      string
-	Source       string `gorm:"unique_index:idx_title_source"` // Create index with title and source
+	Source       string
+	Sourcelcase  string `gorm:"unique_index:idx_title_source"` // Create index with title and source
 	Urls         []ChannelUrl
 	Groupdetails []ChannelGroup
 }
 type ChannelUrl struct {
 	gorm.Model
-	Name      string
-	Value     string
-	ChannelID uint
+	Name       string
+	Namelcase  string
+	Value      string
+	Valuelcase string
+	ChannelID  uint
 }
 type ChannelGroup struct {
 	gorm.Model
-	Name      string
-	Value     string
-	ChannelID uint
+	Name       string
+	Namelcase  string
+	Value      string
+	Valuelcase string
+	ChannelID  uint
 }
 type MediaPlaylist struct {
 	ChannelList []Channel
+}
+
+func (h *ChannelGroup) StringM3U() string {
+	return fmt.Sprintf("%s=%s", h.Name, h.Value)
+}
+func (h *ChannelUrl) StringM3U() string {
+	return fmt.Sprintf("%s=%s", h.Name, h.Value)
+}
+func (h *Channel) StringM3U() string {
+	grpString := ""
+	for _, v := range h.Groupdetails {
+		grpString += v.StringM3U() + " "
+	}
+	urlString := ""
+	for _, v := range h.Urls {
+		urlString += v.StringM3U() + " "
+	}
+
+	retString := ""
+	retString = fmt.Sprintf("%s-1 %s,%s\n", EXTINF, grpString, h.Title)
+	retString = retString + h.MainUrl + " " + urlString
+	return retString
 }
 
 // Detect playlist type and decode it from input stream.
@@ -488,10 +428,10 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, source string) err
 			//last is Title
 			title = params[len(params)-1]
 		}
-		channel := Channel{SeqNo: len(p.ChannelList) + 1, Title: title, Source: source}
+		channel := Channel{SeqNo: len(p.ChannelList) + 1, Title: title, Source: source, Titlelcase: strings.ToLower(title), Sourcelcase: strings.ToLower(source)}
 		rMatchedGroups := reGroups.FindAllStringSubmatch(params[0], -1)
 		for j, _ := range rMatchedGroups {
-			channel.Groupdetails = append(channel.Groupdetails, ChannelGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2]})
+			channel.Groupdetails = append(channel.Groupdetails, ChannelGroup{Name: rMatchedGroups[j][1], Value: rMatchedGroups[j][2], Namelcase: strings.ToLower(rMatchedGroups[j][1]), Valuelcase: strings.ToLower(rMatchedGroups[j][2])})
 		}
 
 		p.ChannelList = append(p.ChannelList, channel)
@@ -509,7 +449,7 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, source string) err
 				if len(urls) > 1 {
 					rMatchedUrls := reUrls.FindAllStringSubmatch(urls[1], -1)
 					for j, _ := range rMatchedUrls {
-						channel.Urls = append(channel.Urls, ChannelUrl{Name: rMatchedUrls[j][1], Value: rMatchedUrls[j][2]})
+						channel.Urls = append(channel.Urls, ChannelUrl{Name: rMatchedUrls[j][1], Value: rMatchedUrls[j][2], Namelcase: strings.ToLower(rMatchedUrls[j][1]), Valuelcase: strings.ToLower(rMatchedUrls[j][2])})
 					}
 
 				}
