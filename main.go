@@ -14,11 +14,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"strings"
-	//	"time"
-	//	"encoding/json"
-	//	"io/ioutil"
 	"regexp"
+	"strings"
 )
 
 // const (
@@ -45,7 +42,7 @@ const (
 	EXTINF       = "#EXTINF:"
 )
 
-var bFF_USEDB = true
+var bFF_USEDB = false
 var bFF_ENABLEDBLOG = false
 var bFF_DBRECREATE = false
 var PGdb *gorm.DB
@@ -453,7 +450,11 @@ func decodeLineOfMediaPlaylist(p *MediaPlaylist, line string, source string) err
 					}
 
 				}
-				PGdb.Create(&channel)
+				if bFF_USEDB == true {
+					PGdb.Create(&channel)
+				} else {
+					log.Println(channel)
+				}
 			}
 		}
 
